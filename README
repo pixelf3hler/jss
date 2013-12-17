@@ -1,0 +1,24 @@
+jss enables you to mix javascript and css. Example:
+
+just define a style node inside your html head and set its type to "text/x-jss". That keeps the browser from processing it as css.
+In that node you can now write javascript code wrapped in processing instructions..kinda like when mixing php and html:
+
+<style type="text/x-jss">
+<?jss def 
+green: "#7eff48",
+roundCorners: function(radius, unit) {
+   return "border-radius: " + radius + unit + ";"
+}
+?>
+
+.test-class {
+   color: <?jss def.green ?>;
+}
+
+.mixin-test {
+   <?jss def.roundCorners("6", "px") ?>
+}
+</style>
+
+The script block tagged `def` is used to define variables and functions on an object named def. That's why it uses object notation syntax.
+The oneliners just reference properties on `def` and return the appropriate value.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1">
+   <title>jss</title>
+   <style type="text/x-jss">
+      <?jss def
+         green: "#7eff48",
+         blue: "#14e15f",
+         roundCorner: function(radius) {
+            return "border-radius: " + radius + ";"
+         }
+      ?>
+      
+      .test-class {
+         color: <?jss def.green ?>;
+      }
+      
+      #mixin_test {
+         <?jss def.roundCorner("6px") ?>
+      }
+   </style>
+</head>
+<body>
+<script src="core/jss.js"></script>
+<script>
+   //JSS.exec()
+   JSS.exec("test/load_test.jss")
+</script>
+</body>
+</html>
