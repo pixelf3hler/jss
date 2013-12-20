@@ -4,7 +4,7 @@ just define a style node inside your html head and set its type to "text/x-jss".
 In that node you can now write javascript code wrapped in processing instructions..kinda like when mixing php and html:
 
 <style type="text/x-jss">
-<?jss def 
+<?jss def="j"
 green: "#7eff48",
 roundCorners: function(radius, unit) {
    return "border-radius: " + radius + unit + ";"
@@ -12,11 +12,11 @@ roundCorners: function(radius, unit) {
 ?>
 
 .test-class {
-   color: <?jss def.green ?>;
+   color: <?jss j.green ?>;
 }
 
 .mixin-test {
-   <?jss def.roundCorners("6", "px") ?>
+   <?jss j.roundCorners("6", "px") ?>
 }
 </style>
 

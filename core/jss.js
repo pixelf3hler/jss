@@ -1,12 +1,12 @@
 /*!
    jss.js
-   version 0.1.0
+   version 0.1.2
  © 2013 max ɐʇ pixelf3hler · de
    The MIT License
    see license.txt
    
    roadmap version 1.0.0:
-   - load source files via xhr/jsonp
+   ✓ load source files via xhr/jsonp
    - support multithreading / asynchronous eval (come up with a way to pass function objects to the worker)
    - since using eval is generally considered evil, maybe i should think about an alternative
 */
@@ -26,6 +26,22 @@
    
    function isURL(str) {
       return ("string" === typeof(str) && /(?:https?:\/\/)?[\w.\/\-]+\.(?:j|c)ss?$/i.test(str))
+   }
+   
+   function getTypeOf(obj) {
+      var t = Object.prototype.toString.call(obj)
+      return t.substring(t.indexOf(" ") + 1, t.length-1).toLowerCase()
+   }
+   
+   function isType(obj) {
+      var types = Array.prototype.slice.call(arguments, 1)
+      if(types && types.length) {
+         var i = 0, n = types.length, t = getTypeOf(obj)
+         for(; i < n; i++) {
+            if(t === types[i]) return true
+         }
+      }      
+      return false
    }
    
    function loadFile(url, callback) {
@@ -83,7 +99,6 @@
             }
             return ""
          })
-         
       }else {
          this.cleanSource = this.source.replace(/^<\?jss\s*|\s*\?>$/g, '')
       }
@@ -91,8 +106,9 @@
    
    JSS.Block.prototype.process = function(input) {
       try{
-      //console.log(this.cleanSource)
          if(this.isDefBlock) {
+            // make sure that cleanSource isn't quoted by curlys
+            this.cleanSource = this.cleanSource.replace(/^\{|\}$/g, "")
             if(!GLOBAL[defId]) {
                GLOBAL[defId] = eval("({" + this.cleanSource + "})")
             }else {
@@ -127,6 +143,12 @@
    }
    
    JSS.createStyleNode = function(css) {
+      // clean up source nodes first..
+      var sourceNodes = window.document.querySelectorAll('style[type="text/x-jss"]')
+      JSS.iter(sourceNodes, function(n) {
+         JSS.removeDOMNode(n)
+      })
+      
       var node = window.document.createElement("style")
       node.setAttribute("type", "text/css")
       node.appendChild(window.document.createTextNode(css))
@@ -170,7 +192,7 @@
             if(/\w+/.test(o)) JSS.output.push(o)
          })
          
-         window.console && console.log("JSS.output: %s", JSS.output.join("\n\n"))
+         window.console && console.log("JSS.output: %o", JSS.output)
          
          JSS.createStyleNode(JSS.output.join("\n"))
       }
@@ -187,10 +209,13 @@
             JSS.process()
          })
       }else {
+         if(!isType(src, "array", "nodelist")) {
+            src = [src]
+         }
          JSS.iter(src, function(itm) {
             var // serialize to string if neccessary and extract code blocks
             source = ("string" === typeof(itm)) ? itm : xmlser.serializeToString(itm)
-                     
+            // we need to preserve processing instructions, so itm.textContent is not an option
             source = source.replace(/^\s*<style type="text\/x-jss">(?:\n|\r\n|\r)|(?:\n|\r\n|\r|\s)*<\/style>\s*$/mg, '')
             JSS.parse(source)
             JSS.input.push(source)
